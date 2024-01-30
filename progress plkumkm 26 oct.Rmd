@@ -1,0 +1,608 @@
+---
+title: "Progress PLKUMKM Kota Tebing Tinggi Kondisi 26 Oktober 2023"
+author: "Ayunning Tieas"
+date: "2023-10-26"
+output: 
+  rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Library, echo=FALSE, include=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(kableExtra)
+library(colorspace)  
+library(ggplot2)
+```
+
+```{r DataPreparation, echo=FALSE}
+
+#SETWD
+setwd("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS")
+
+AKHYAR <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/AKHYAR.xlsx") %>%  mutate(Kabkot = "1274")
+
+ELINA <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/ELINA.xlsx") %>%  mutate(Kabkot = "1274")
+
+LUTFI <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/LUTFI.xlsx") %>%  mutate(Kabkot = "1274")
+
+SUNGKONO <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/SUNGKONO.xlsx") %>%  mutate(Kabkot = "1274")
+
+TUKIMIN <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/TUKIMIN.xlsx") %>%  mutate(Kabkot = "1274")
+
+YULI <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/YULI.xlsx") %>%  mutate(Kabkot = "1274")
+
+all_tebingtinggi <- bind_rows(ELINA, AKHYAR, LUTFI, SUNGKONO, TUKIMIN, YULI)
+
+attach(all_tebingtinggi)
+
+PCL_name <- unique(PCL)
+PML_name <- unique(PML)
+KOSEKA_name <-unique(Koseka)
+
+Progress_26Oct <- read_excel("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/1. BPS NEW 2023/2 Distribusi 2023/PLKUMKM 2023/MATRIKS DAN PROGRESS/26okt2023-PROGRESS.xlsx") %>% 
+  rename (X = PersenRealisasi) %>% mutate (PersenRealisasi = 100*X)
+
+all_tebingtinggi_and_progress <- left_join(all_tebingtinggi, Progress_26Oct, by="ID_SLS") %>%
+  rename(Kecamatan_ = Kecamatan.x , Kelurahan_ =  Kelurahan.x )
+
+
+```
+
+# [1] Progress Per PCL Berdasarkan SLS *Flag* Selesai
+
+Berikut adalah progress lapangan per PCL berdasarkan status *flag* sudah selesai.
+
+PCL yang **belum mencapai kondisi separuh (50%)** dari beban tugasnya ber-*flag* selesai, maka **ditandai dengan warna merah**, yang artinya perlu dipantau dan diberi perhatian secara lebih.
+
+```{r SLSFlag, echo=FALSE}
+sls_flag_26okt <- read_excel("26okt-progress-sls-selesaibelumnya.xlsx") 
+
+sls_flag_tebingtinggi <- left_join(all_tebingtinggi, sls_flag_26okt, by="ID_SLS") %>%
+  rename(Kecamatan_ = Kecamatan.x , Kelurahan_ =  Kelurahan.x ) %>% 
+  mutate(Beban_SLS = 1,
+         SLS_selesai=ifelse(Status_SLS=="Selesai",1,0))
+
+Show_slsflag <- sls_flag_tebingtinggi %>% group_by(Koseka,PML,PCL) %>%
+  summarize_at(c('Beban_SLS','SLS_selesai'),sum) %>% 
+  mutate(Persentase_SLS_Flag_Selesai=round(SLS_selesai/Beban_SLS*100,2)) %>% 
+  arrange(Koseka, PML, Persentase_SLS_Flag_Selesai)
+
+```
+
+### Tim Sungkono
+
+```{r FlagSungkono, echo=FALSE}
+
+color.darkred_Show_slsflagSungkono <- which(
+  (filter(Show_slsflag, Koseka=="Sungkono"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="Sungkono") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Sungkono
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagSungkono, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+
+### Tim Akhyar
+
+```{r FlagAkhyar, echo=FALSE}
+
+color.darkred_Show_slsflagAkhyar <- which(
+  (filter(Show_slsflag, Koseka=="M. Akhyar"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="M. Akhyar") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Akhyar
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagAkhyar, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+### Tim Lutfi
+
+```{r FlagLutfi, echo=FALSE}
+
+color.darkred_Show_slsflagLutfi <- which(
+  (filter(Show_slsflag, Koseka=="Lutfi"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="Lutfi") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Lutfi
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagLutfi, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+### Tim Tukimin
+
+```{r FlagTukimin, echo=FALSE}
+
+color.darkred_Show_slsflagTukimin <- which(
+  (filter(Show_slsflag, Koseka=="Tukimin"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="Tukimin") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Tukimin
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagTukimin, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+### Tim Mahyuly
+
+```{r FlagMahyuly, echo=FALSE}
+
+color.darkred_Show_slsflagMahyuly <- which(
+  (filter(Show_slsflag, Koseka=="Mahyuly Suaidah Siregar"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="Mahyuly Suaidah Siregar") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Mahyuly
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagMahyuly, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+
+
+### Tim Elina
+
+```{r FlagElina, echo=FALSE}
+
+color.darkred_Show_slsflagElina <- which(
+  (filter(Show_slsflag, Koseka=="Elina Maisyarah"))$Persentase_SLS_Flag_Selesai < 50 )
+
+Show_slsflag %>% filter(Koseka=="Elina Maisyarah") %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Flag SLS Selesai 26 Oktober 2023 Pukul 04.00WIB - PER PCL di Tim Elina
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_slsflagElina, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+# [2] Progress Per PCL Berdasarkan Realisasi Pendataan **Usaha**
+
+Berikut adalah progress lapangan per PCL berdasarkan realisasi pendataan **usaha**.
+
+PCL yang **belum mencapai kondisi separuh (50%)** dari nilai estimasi maka **ditandai dengan warna merah**, yang artinya perlu dipantau dan diberi perhatian secara lebih.
+
+```{r RealisasiUsaha, echo=FALSE}
+
+usahasandbox_20okt2023 <- read_excel("20okt2023-PROGRESS_usahasandbox.xlsx")
+
+usaha_petugas_20okt2023 <- left_join(all_tebingtinggi, usahasandbox_20okt2023,
+                                     by="ID_SLS") %>%
+  rename(Kecamatan_ = Kecamatan.x , Kelurahan_ =  Kelurahan.x ) %>% 
+  select(realisasi_usaha_percent, Koseka, PCL, PML, Kecamatan_, Kelurahan_, ID_SLS)
+```
+
+### Tim Sungkono
+
+```{r UsahaSungkono, echo=FALSE}
+
+color.darkred_Show_usahaSungkono <- which(
+  (filter(usaha_petugas_20okt2023, Koseka=="Sungkono"))$realisasi_usaha_percent < 50 )
+
+usaha_petugas_20okt2023 %>% filter(Koseka=="Sungkono") %>%
+  select(-Koseka) %>% 
+  kable(booktabs = T, align = "c", caption = "<center><strong>
+        Progress Realisasi Usaha 26 Oktober 2023 - PER PCL di Tim Sungkono
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%
+  row_spec(color.darkred_Show_usahaSungkono, bold = T, color = "white", background = "darkred") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+
+
+
+
+
+
+
+# [3] Progress Per SLS
+
+Berikut ini ditampilkan progress submit, reject, dan approve per SLS.
+
+Pada tabel yang ditampilkan berikut ini, tiap baris memiliki warna, dengan arti:
+
+-   **Merah gelap** berarti progress realisasi masih di bawah 50% atau termasuk **"Mengkhawatirkan, Perlu Perhatian Extra"**,
+
+-   **Merah violet** berarti progress realisasi masih di antara 50% - \< `r round((3/4*(30-0)/30*100),2)`% atau termasuk **"Sangat Perlu Dikejar"**,
+
+-   **Kuning** berarti progress realisasi masih di antara `r round((3/4*(30-0)/30*100),2)`% - \<`r round(((30-0)/30*100),2)`% atau termasuk **"Perlu Dikejar Lagi"**,
+
+-   **Putih (normal)** berarti progress realisasi sudah minimal `r round(((30-0)/30*100),2)`% atau termasuk **"Ideal"** untuk per tanggal 26 Oktober 2023
+
+```{r ProgressSLS, echo=FALSE}
+
+Show <- all_tebingtinggi_and_progress %>% dplyr::select(PersenRealisasi, Koseka, PML, PCL, ID_SLS, Kecamatan_, Kelurahan_, Submitted, Approved, Rejected, Revoked, Realisasi, Estimasi) %>% arrange(PersenRealisasi) %>% mutate(PersenRealisasi = round(PersenRealisasi,2))
+
+color.darkred_ProgressSLS <- which(Show$PersenRealisasi < 50)
+
+# 5 adalah sisa waktu pencacahan
+color.violetred_ProgressSLS <- which(Show$PersenRealisasi >= 50 & Show$PersenRealisasi < 3/4*(30-0)/30*100 )
+color.yellow_ProgressSLS <- which(Show$PersenRealisasi >= 3/4*(30-0)/30*100 &
+                        Show$PersenRealisasi < (30-0)/30*100 )
+
+Show %>% kable(align = "c", "html",
+               caption = "<center><strong>
+               Summary Progress 26 Oktober 2023 Pukul 04.00WIB - PLKUMKM Tebing Tinggi
+               </strong></center>") %>%
+  kable_styling(fixed_thead = TRUE) %>% 
+  row_spec(color.darkred_ProgressSLS, bold = T, color = "white", background = "darkred") %>% 
+  row_spec(color.violetred_ProgressSLS, bold = T, color = "white", background = "#FF34B3") %>%
+  row_spec(color.yellow_ProgressSLS, bold = T, color = "black", background = "yellow") %>% 
+  scroll_box(width = "800px", height = "500px", fixed_thead = TRUE) %>% 
+  add_header_above()
+
+
+```
+
+# [4] Progress Per Koseka
+
+Berikut disajikan progress realisasi lapangan berdasarkan target "Keluarga" di masing-masing tim Koseka:
+
+```{r ProgressKoseka, echo=FALSE}
+
+#PROGRESS PER KOSEKA
+
+Show_Koseka <- all_tebingtinggi_and_progress %>% group_by(Koseka) %>%
+  summarize_at(c('Estimasi','Realisasi'),sum) %>% 
+  mutate(Persen_Realisasi_Koseka=round(Realisasi/Estimasi*100,2)) %>% 
+  arrange(Persen_Realisasi_Koseka) %>% 
+  dplyr::select(Persen_Realisasi_Koseka , Koseka, Estimasi, Realisasi)
+
+color.darkred_KOSEKA <- which(Show_Koseka$Persen_Realisasi_Koseka < 50)
+# 5 adalah sisa waktu pencacahan
+color.violetred_KOSEKA <- which(Show_Koseka$Persen_Realisasi_Koseka >= 50 & 
+                         Show_Koseka$Persen_Realisasi_Koseka < 3/4*(30-0)/30*100 )
+color.yellow_KOSEKA <- which(Show_Koseka$Persen_Realisasi_Koseka >= 3/4*(30-0)/30*100 &
+                      Show_Koseka$Persen_Realisasi_Koseka < (30-0)/30*100 )
+
+Show_Koseka %>% kable(booktabs = T, align = "c",
+               caption = "<center><strong>
+               Progress Lapangan 26 Oktober 2023 Pukul 04.00WIB - PER KOSEKA
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%   
+  row_spec(color.darkred_KOSEKA, bold = T, color = "white", background = "darkred") %>% 
+  row_spec(color.violetred_KOSEKA, bold = T, color = "white", background = "#FF34B3") %>% 
+  row_spec(color.yellow_KOSEKA, bold = T, color = "black", background = "yellow") %>%
+  scroll_box(width = "800px", height = "400px", fixed_thead = T)
+
+```
+
+# [5] Progress Per PML
+
+Berikut ini adalah rangkuman progress per PML untuk kegiatan pencacahan "Keluarga" di lapangan:
+
+```{r ProgressPMLLapangan, echo=FALSE}
+######### PROGRESS LAPANGAN ########
+
+Progress_Lapangan_PML <- all_tebingtinggi_and_progress %>% group_by(Koseka,PML) %>%
+  summarize_at(c('Estimasi','Realisasi'),sum) %>% 
+  mutate(Persen_Realisasi_PML= round(Realisasi/Estimasi*100,2)) %>% 
+  arrange(Persen_Realisasi_PML) %>% 
+  dplyr::select(Persen_Realisasi_PML, Koseka, PML)
+
+color.darkred_Progress_Lapangan_PML <- which(Progress_Lapangan_PML$Persen_Realisasi_PML < 50)
+# 5 adalah sisa waktu pencacahan
+color.violetred_Progress_Lapangan_PML <- which(
+  Progress_Lapangan_PML$Persen_Realisasi_PML >= 50 & 
+  Progress_Lapangan_PML$Persen_Realisasi_PML < 3/4*(30-0)/30*100 )
+color.yellow_Progress_Lapangan_PML <- which(
+  Progress_Lapangan_PML$Persen_Realisasi_PML >= 3/4*(30-0)/30*100 &
+  Progress_Lapangan_PML$Persen_Realisasi_PML < (30-0)/30*100 )
+
+Progress_Lapangan_PML %>% kable(booktabs = T,align = "c",
+               caption = "<center><strong>
+               Summary Progress Lapangan 26 Oktober 2023 Pukul 04.00WIB - PER PML
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%   
+  row_spec(color.darkred_Progress_Lapangan_PML, bold = T, color = "white", background = "darkred") %>% 
+  row_spec(color.violetred_Progress_Lapangan_PML, bold = T, color = "white", background = "#FF34B3") %>%
+  row_spec(color.yellow_Progress_Lapangan_PML, bold = T, color = "black", background = "yellow") %>% 
+  scroll_box(width = "800px", height = "300px", fixed_thead = T)
+```
+
+Berikutnya adalah rangkuman progress per PML untuk kegiatan approval di aplikasi CAPI:
+
+```{r ProgressPMLApproval, echo=FALSE}
+######### PROGRESS APPROVAL ########
+Progress_Approval_PML <- all_tebingtinggi_and_progress %>% group_by(Koseka,PML) %>%
+  summarize_at(c('Realisasi','Approved'),sum) %>% 
+  mutate(Persen_Approved = round((Approved/Realisasi*100),2) ,
+         Persen_Approved = ifelse(Approved==0,0,Persen_Approved)) %>% 
+  arrange(Persen_Approved) %>% 
+  dplyr::select(Persen_Approved, Koseka, PML, Realisasi,Approved)
+
+color.darkred_Approval_PML <- which(Progress_Approval_PML$Persen_Approved < 50)
+# 5 adalah sisa waktu pencacahan
+color.violetred_Approval_PML <- which(
+  Progress_Approval_PML$Persen_Approved >= 50 & 
+  Progress_Approval_PML$Persen_Approved < 3/4*(30-0)/30*100 )
+color.yellow_Approval_PML <- which(
+  Progress_Approval_PML$Persen_Approved >= 3/4*(30-0)/30*100 &
+  Progress_Approval_PML$Persen_Approved < (30-0)/30*100 )
+
+Progress_Approval_PML %>% kable(booktabs = T,align = "c",
+               caption = "<center><strong>
+               Progress APPROVAL 26 Oktober 2023 Pukul 04.00WIB - PER PML
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%   
+  row_spec(color.darkred_Approval_PML, bold = T, color = "white", background = "darkred") %>% 
+  row_spec(color.violetred_Approval_PML, bold = T, color = "white", background = "#FF34B3") %>% 
+  row_spec(color.yellow_Approval_PML, bold = T, color = "black", background = "yellow") %>% 
+  scroll_box(width = "800px", height = "300px", fixed_thead = T)
+```
+
+## **(!) Berikut ini disajikan visualisasi progress approval hasil pendataan "Keluarga" per PML di masing-masing TIM/KOSEKA:**
+
+### Tim Sungkono
+
+```{r ProgressPMLSungkono, echo=FALSE}
+#### BAR PLOT ####
+
+ggplot(Progress_Approval_PML %>% filter(Koseka=="Sungkono"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="aquamarine") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.6) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim Sungkono [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Akhyar
+
+```{r ProgressPMLAkhyar, echo=FALSE}
+ggplot(Progress_Approval_PML %>% filter(Koseka=="M. Akhyar"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="coral1") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim M. Akhyar [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Lutfi
+
+```{r ProgressPMLLutfi, echo=FALSE}
+ggplot(Progress_Approval_PML %>% filter(Koseka=="Lutfi"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="yellow3") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim Lutfi [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Tukimin
+
+```{r ProgressPMLTukimin, echo=FALSE}
+ggplot(Progress_Approval_PML %>% filter(Koseka=="Tukimin"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="green3") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim Tukimin [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Mahyuly
+
+```{r ProgressPMLMahyuly, echo=FALSE}
+ggplot(Progress_Approval_PML %>% filter(Koseka=="Mahyuly Suaidah Siregar"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="violet") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim Mahyuly [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Elina
+
+```{r ProgressPMLElina, echo=FALSE}
+ggplot(Progress_Approval_PML %>% filter(Koseka=="Elina Maisyarah"),
+       aes(x=reorder(PML, Persen_Approved), y=Persen_Approved)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="burlywood1") + coord_flip() +
+  geom_text(aes(label = Persen_Approved, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Approval (%)") +
+  ggtitle("Progress Approval Per PML Pada Tim Elina [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+
+```
+
+# [6] Progress Per PCL Berdasarkan Target Keluarga
+
+Berikut adalah progress lapangan per PCL berdasarkan target "Keluarga" di lapangan:
+
+```{r ProgressPCL, echo=FALSE}
+Progress_Lapangan_PCL <- all_tebingtinggi_and_progress %>% group_by(Koseka,PML, PCL) %>%
+  summarize_at(c('Estimasi','Realisasi'),sum) %>% 
+  mutate(Persen_Realisasi_PCL= round(Realisasi/Estimasi*100,2)) %>% 
+  arrange(Persen_Realisasi_PCL) %>% 
+  dplyr::select(Persen_Realisasi_PCL, Koseka, PML, PCL)
+
+color.darkred_Progress_Lapangan_PCL <- which(Progress_Lapangan_PCL$Persen_Realisasi_PCL < 50)
+# 5 adalah sisa waktu pencacahan
+color.violetred_Progress_Lapangan_PCL <- which(
+  Progress_Lapangan_PCL$Persen_Realisasi_PCL >= 50 & 
+  Progress_Lapangan_PCL$Persen_Realisasi_PCL < 3/4*(30-0)/30*100 )
+color.yellow_Progress_Lapangan_PCL <- which(
+  Progress_Lapangan_PCL$Persen_Realisasi_PCL >= 3/4*(30-0)/30*100 &
+  Progress_Lapangan_PCL$Persen_Realisasi_PCL < (30-0)/30*100 )
+
+Progress_Lapangan_PCL %>% kable(booktabs = T,align = "c",
+               caption = "<center><strong>
+               Progress Lapangan 26 Oktober 2023 Pukul 04.00WIB - PER PCL
+               </strong></center>") %>%
+  kable_styling(fixed_thead = T) %>%   
+  row_spec(color.darkred_Progress_Lapangan_PCL, bold = T, color = "white", background = "darkred") %>% 
+  row_spec(color.violetred_Progress_Lapangan_PCL, bold = T, color = "white", background = "#FF34B3") %>%
+  row_spec(color.yellow_Progress_Lapangan_PCL, bold = T, color = "black", background = "yellow") %>% 
+  scroll_box(width = "800px", height = "300px", fixed_thead = T)
+```
+
+## **(!) Berikut ini disajikan visualisasi progress pencacahan "Keluarga" per PCL di masing-masing TIM/KOSEKA:**
+
+### Tim Sungkono
+
+```{r ProgressPCLSungkono, echo=FALSE}
+#### BAR PLOT ####
+
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="Sungkono"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="aquamarine") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.6) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)") +
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim Sungkono [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+
+###Status Selesai###
+
+
+```
+
+### Tim Akhyar
+
+```{r ProgressPCLAkhyar, echo=FALSE}
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="M. Akhyar"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="coral1") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)")+
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim M. Akhyar [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Lutfi
+
+```{r ProgressPCLLutfi, echo=FALSE}
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="Lutfi"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="yellow3") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)")+
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim Lutfi [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Tukimin
+
+```{r ProgressPCLTukimin, echo=FALSE}
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="Tukimin"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="green3") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)")+
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim Tukimin [26 Oktober 2023 04.00WIB]") +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 0, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=9))
+  
+
+
+
+```
+
+### Tim Mahyuly
+
+```{r ProgressPCLMahyuly, echo=FALSE}
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="Mahyuly Suaidah Siregar"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="violet") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)")+
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim Mahyuly [26 Oktober 2023 04.00WIB]") +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
+
+### Tim Elina
+
+```{r ProgressPCLElina, echo=FALSE}
+ggplot(Progress_Lapangan_PCL %>% filter(Koseka=="Elina Maisyarah"),
+       aes(x=reorder(PCL, Persen_Realisasi_PCL), y=Persen_Realisasi_PCL)) + 
+  geom_bar(stat = "identity", width = 0.5,  fill="burlywood1") + coord_flip() +
+  geom_text(aes(label = Persen_Realisasi_PCL, hjust = -0.1), vjust = 0.5,
+             color = "black", size=2.3) +  # Add value at the end of bars
+  facet_wrap(~Koseka, scales = "free_y", ncol = 1)+
+  xlab("Nama Petugas") +  ylab("Progress Realisasi (%)")+
+  ggtitle("Progress Realisasi Lapangan Per PCL Pada Tim Elina [26 Oktober 2023 04.00WIB]")  +
+  theme_classic() +
+  theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 9), axis.title.y = element_text(size = 9),
+    plot.title = element_text(size=11))
+```
