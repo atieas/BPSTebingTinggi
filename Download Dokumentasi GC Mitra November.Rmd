@@ -1,0 +1,125 @@
+---
+title: "Dokumentasi GC Mitra november"
+author: "Ayunning Tieas"
+date: "2023-12-28"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, results="hide", fig.keep = "none")
+```
+
+```{r library, echo=FALSE, message=FALSE, warning=FALSE} 
+library(magick)
+library(tidyverse)
+library(readxl)
+library(purrr)
+# Install and load the googledrive library if not already installed
+if (!requireNamespace("googledrive", quietly = TRUE)) {
+  install.packages("googledrive")
+}
+library(googledrive)
+library(gargle)
+library(httr)
+library(curl)
+```
+
+
+```{r dataset, echo=FALSE, message=FALSE, warning=FALSE}
+
+setwd("C:/Users/kipas/1-MY-CORE-DRIVE/2 -- hobby with salary/2. Distribusi 2023/PLKUMKM 2023/laporan mitra NOVEMBER/DOKUMENTASI NOVEMBER")
+
+##################
+# insert dataset #
+##################
+
+gc_nov_mitra_pisahLINK <- read_excel("gc_nov_mitra_pisahLINK.xlsx",
+    col_types = c("text", "date", "text",
+        "date", "text", "text", "text", "text",
+        "text", "text", "numeric", "text"))
+
+#perbaiki format data frame dulu
+gc_nov_mitra_pisahLINK <- gc_nov_mitra_pisahLINK %>%
+  mutate(
+    tanggal = `Tanggal Foto\r\r\n(Perhatian! Bila Belum Ada Tanggal di Foto maka Wajib Diberi Tanggal Dulu)`,
+    tanggal_newformat =  format(tanggal, "%d-%m-%Y"),
+    nama_tanggal = tools::toTitleCase(tolower(paste("Dokumentasi Kegiatan an",`Nama`,"Tanggal",tanggal_newformat , sep = " ")))) %>%
+  arrange(nama_tanggal)
+# View(gc_nov_mitra_pisahLINK)
+
+```
+
+
+```{r download-picture, echo=FALSE, message=FALSE, warning=FALSE}
+
+ 
+#####################
+# download pictures #
+#####################
+
+# Authenticate with Google Drive (opens a browser window)
+drive_auth()
+
+for (i in 250:nrow(gc_nov_mitra_pisahLINK)) {
+
+  #get link1
+  url1 <- gc_nov_mitra_pisahLINK[i,"link1"]
+  url2 <- gc_nov_mitra_pisahLINK[i,"link2"]
+  url3 <- gc_nov_mitra_pisahLINK[i,"link3"]
+
+  # Extract ID from the Google Drive link using regular expression
+  file_id1 <- sub(".*/open\\?id=([^&]+).*", "\\1", url1)
+  file_id2 <- sub(".*/open\\?id=([^&]+).*", "\\1", url2)
+  file_id3 <- sub(".*/open\\?id=([^&]+).*", "\\1", url3)
+
+  #make new elligible link
+  url_new_1 <- paste0("https://drive.google.com/uc?export=download&id=",file_id1)
+  url_new_2 <- paste0("https://drive.google.com/uc?export=download&id=",file_id2)
+  url_new_3 <- paste0("https://drive.google.com/uc?export=download&id=",file_id3)
+
+  #give names for the downloaded photo
+  name1 <- paste(gc_nov_mitra_pisahLINK[i, "Nama"],
+                 gc_nov_mitra_pisahLINK[i, "tanggal_newformat"],"--- 1.jpg")
+  name2 <- paste(gc_nov_mitra_pisahLINK[i, "Nama"],
+                 gc_nov_mitra_pisahLINK[i, "tanggal_newformat"],"--- 2.jpg")
+  name3 <- paste(gc_nov_mitra_pisahLINK[i, "Nama"],
+                 gc_nov_mitra_pisahLINK[i, "tanggal_newformat"],"--- 3.jpg")
+
+  # download image to local drive and give name
+  # use download.file()
+  # Sys.sleep(10)
+  # download.file(url = url_new_1, destfile = name1,
+  #               mode = "wb", extra = "--no-check-certificate", method = 'libcurl')
+  # if(!is.na(file_id2)) {
+  #   Sys.sleep(10)
+  #   download.file(url = url_new_2, destfile = name2, mode = "wb",
+  # extra = "--no-check-certificate", method = 'libcurl')}
+  # if(!is.na(file_id3)) {
+  #   Sys.sleep(10)
+  #   download.file(url = url_new_3, destfile = name3, mode = "wb",
+  # extra = "--no-check-certificate",method = 'libcurl')}
+  #
+
+  # # download image to local drive and give name
+  # # using drive_download()
+  file_info1 <- drive_get(as_id(file_id1))
+  if(!is.na(file_id2)) {file_info2 <- drive_get(as_id(file_id2))}
+  if(!is.na(file_id3)) {file_info3 <- drive_get(as_id(file_id3))}
+
+  Sys.sleep(10)
+  drive_download(file_info1, path=name1, overwrite = TRUE)
+
+  if(!is.na(file_id2)) {
+    Sys.sleep(10)
+    drive_download(file_info2, path=name2, overwrite = TRUE)}
+
+  if(!is.na(file_id3)) {
+    Sys.sleep(10)
+    drive_download(file_info3, path=name3, overwrite = TRUE)}
+
+}
+
+```
+
